@@ -41,24 +41,8 @@ inputs:
     description: 'The branch, tag or SHA to checkout. See https://github.com/actions/checkout'
     required: false
     default: ''
-  ssh-key:
-    description: 'SSH key used to fetch the repository. SSH key is used instead of the token if provided. See https://github.com/actions/checkout'
-    required: false
-    default: ''
-  ssh-known-hosts:
-    description: 'Known hosts in addition to the user and global host key database. See https://github.com/actions/checkout'
-    required: false
-    default: ''
-  ssh-strict:
-    description: 'Whether to perform strict host key checking. See https://github.com/actions/checkout'
-    required: false
-    default: 'true'
-  ssh-user:
-    description: 'The user to use when connecting to the remote SSH host. See https://github.com/actions/checkout'
-    required: false
-    default: 'git'
   persist-credentials:
-    description: 'Whether to configure the token or SSH key with the local git config. See https://github.com/actions/checkout'
+    description: 'Whether to configure the token with the local git config. See https://github.com/actions/checkout'
     required: false
     default: 'true'
   path:
@@ -140,11 +124,7 @@ runs:
       with:
         repository: ${{ inputs.repository }}
         ref: ${{ inputs.ref }}
-        token: ${{ inputs.ssh-key && '' || steps.app-token.outputs.token }}
-        ssh-key: ${{ inputs.ssh-key }}
-        ssh-known-hosts: ${{ inputs.ssh-known-hosts }}
-        ssh-strict: ${{ inputs.ssh-strict }}
-        ssh-user: ${{ inputs.ssh-user }}
+        token: ${{ steps.app-token.outputs.token }}
         persist-credentials: ${{ inputs.persist-credentials }}
         path: ${{ inputs.path }}
         clean: ${{ inputs.clean }}
