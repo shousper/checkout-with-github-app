@@ -23,11 +23,14 @@ A composite GitHub Action that combines GitHub App authentication with repositor
 
 ### With Submodules
 
+⚠️ **Important**: When using submodules, you **must** specify the `owner` parameter (and optionally `repositories`). This is because submodules are external repositories that require the token to have access beyond just the current repository.
+
 ```yaml
 - uses: shousper/checkout-with-github-app-token@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
+    owner: ${{ github.repository_owner }}  # Required for submodules!
     submodules: recursive
 ```
 
@@ -94,6 +97,8 @@ All standard `actions/checkout@v5` options are supported:
    - **Where can this GitHub App be installed**: Your preference
 3. After creation, note the App ID
 4. Generate a private key and save it
+
+> **Security Consideration**: The GitHub App will have access to all repositories it's installed on. Consider creating separate apps per team or project to maintain proper access isolation and follow the principle of least privilege.
 
 ### 2. Install the App
 
