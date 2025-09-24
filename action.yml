@@ -1,27 +1,160 @@
-name: 'GitHub App Checkout'
-description: 'Checkout repository with GitHub App authentication and submodules'
+name: 'Checkout with GitHub App Token'
+description: 'Checkout a repository using GitHub App authentication, with full support for submodules and all checkout options'
+author: 'shousper'
+branding:
+  icon: 'lock'
+  color: 'green'
+
 inputs:
+  # GitHub App Token Parameters
+  # https://github.com/actions/create-github-app-token
   app-id:
-    description: 'GitHub App ID'
+    description: 'GitHub App ID. See https://github.com/actions/create-github-app-token'
     required: true
   private-key:
-    description: 'GitHub App private key'
+    description: 'GitHub App private key. See https://github.com/actions/create-github-app-token'
     required: true
   owner:
-    description: 'Repository owner for token scope (defaults to current repository owner)'
+    description: 'The owner of the GitHub App installation (defaults to empty, which limits to current repo). See https://github.com/actions/create-github-app-token'
     required: false
     default: ''
+  repositories:
+    description: 'Comma or newline-separated list of repositories to generate the token for. See https://github.com/actions/create-github-app-token'
+    required: false
+    default: ''
+  skip-token-revoke:
+    description: 'If truthy, the token will not be revoked when the action exits. See https://github.com/actions/create-github-app-token'
+    required: false
+    default: 'false'
+  github-api-url:
+    description: 'The URL of the GitHub REST API. See https://github.com/actions/create-github-app-token'
+    required: false
+    default: ${{ github.api_url }}
+
+  # Checkout Parameters
+  # https://github.com/actions/checkout
+  repository:
+    description: 'Repository name with owner. For example, actions/checkout. See https://github.com/actions/checkout'
+    required: false
+    default: ${{ github.repository }}
+  ref:
+    description: 'The branch, tag or SHA to checkout. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  ssh-key:
+    description: 'SSH key used to fetch the repository. SSH key is used instead of the token if provided. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  ssh-known-hosts:
+    description: 'Known hosts in addition to the user and global host key database. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  ssh-strict:
+    description: 'Whether to perform strict host key checking. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  ssh-user:
+    description: 'The user to use when connecting to the remote SSH host. See https://github.com/actions/checkout'
+    required: false
+    default: 'git'
+  persist-credentials:
+    description: 'Whether to configure the token or SSH key with the local git config. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  path:
+    description: 'Relative path under $GITHUB_WORKSPACE to place the repository. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  clean:
+    description: 'Whether to execute `git clean -ffdx && git reset --hard HEAD` before fetching. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  filter:
+    description: 'Partially clone against a given filter. Overrides sparse-checkout if set. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  sparse-checkout:
+    description: 'Do a sparse checkout on given patterns. Each pattern should be separated with new lines. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+  sparse-checkout-cone-mode:
+    description: 'Specifies whether to use cone-mode when doing a sparse checkout. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  fetch-depth:
+    description: 'Number of commits to fetch. 0 indicates all history for all branches and tags. See https://github.com/actions/checkout'
+    required: false
+    default: '1'
+  fetch-tags:
+    description: 'Whether to fetch tags, even if fetch-depth > 0. See https://github.com/actions/checkout'
+    required: false
+    default: 'false'
+  show-progress:
+    description: 'Whether to show progress status. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  lfs:
+    description: 'Whether to download Git-LFS files. See https://github.com/actions/checkout'
+    required: false
+    default: 'false'
+  submodules:
+    description: 'Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules. See https://github.com/actions/checkout'
+    required: false
+    default: 'false'
+  set-safe-directory:
+    description: 'Add repository path as safe.directory for Git global config. See https://github.com/actions/checkout'
+    required: false
+    default: 'true'
+  github-server-url:
+    description: 'The base URL for the GitHub instance that you are trying to clone from. See https://github.com/actions/checkout'
+    required: false
+    default: ''
+
+outputs:
+  token:
+    description: 'The GitHub App installation access token'
+    value: ${{ steps.app-token.outputs.token }}
+  installation-id:
+    description: 'GitHub App installation ID'
+    value: ${{ steps.app-token.outputs.installation-id }}
+  app-slug:
+    description: 'GitHub App slug'
+    value: ${{ steps.app-token.outputs.app-slug }}
+
 runs:
   using: 'composite'
   steps:
-    - uses: actions/create-github-app-token@v1
+    - name: Generate GitHub App Token
+      uses: actions/create-github-app-token@v1
       id: app-token
       with:
         app-id: ${{ inputs.app-id }}
         private-key: ${{ inputs.private-key }}
-        owner: ${{ inputs.owner || github.repository_owner }}
-    - uses: actions/checkout@v4
+        owner: ${{ inputs.owner }}
+        repositories: ${{ inputs.repositories }}
+        skip-token-revoke: ${{ inputs.skip-token-revoke }}
+        github-api-url: ${{ inputs.github-api-url }}
+
+    - name: Checkout Repository
+      uses: actions/checkout@v5
       with:
-        token: ${{ steps.app-token.outputs.token }}
-        submodules: recursive
-        persist-credentials: false
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+        token: ${{ inputs.ssh-key && '' || steps.app-token.outputs.token }}
+        ssh-key: ${{ inputs.ssh-key }}
+        ssh-known-hosts: ${{ inputs.ssh-known-hosts }}
+        ssh-strict: ${{ inputs.ssh-strict }}
+        ssh-user: ${{ inputs.ssh-user }}
+        persist-credentials: ${{ inputs.persist-credentials }}
+        path: ${{ inputs.path }}
+        clean: ${{ inputs.clean }}
+        filter: ${{ inputs.filter }}
+        sparse-checkout: ${{ inputs.sparse-checkout }}
+        sparse-checkout-cone-mode: ${{ inputs.sparse-checkout-cone-mode }}
+        fetch-depth: ${{ inputs.fetch-depth }}
+        fetch-tags: ${{ inputs.fetch-tags }}
+        show-progress: ${{ inputs.show-progress }}
+        lfs: ${{ inputs.lfs }}
+        submodules: ${{ inputs.submodules }}
+        set-safe-directory: ${{ inputs.set-safe-directory }}
+        github-server-url: ${{ inputs.github-server-url }}
