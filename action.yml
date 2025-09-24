@@ -15,10 +15,6 @@ runs:
       with:
         app-id: ${{ inputs.app-id }}
         private-key: ${{ inputs.private-key }}
-    - name: Configure git for private submodules
-      shell: bash
-      run: |
-        git config --global url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
     - uses: actions/checkout@v4
       with:
         token: ${{ steps.app-token.outputs.token }}
