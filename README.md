@@ -15,7 +15,7 @@ A composite GitHub Action that combines GitHub App authentication with repositor
 ### Basic Example
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
@@ -26,7 +26,7 @@ A composite GitHub Action that combines GitHub App authentication with repositor
 ⚠️ **Important**: When using submodules, you **must** specify the `owner` parameter (and optionally `repositories`). This is because submodules are external repositories that require the token to have access beyond just the current repository.
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
@@ -37,7 +37,7 @@ A composite GitHub Action that combines GitHub App authentication with repositor
 ### Multiple Repositories Access
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
@@ -118,7 +118,7 @@ In your repository settings:
 ### Checkout Different Repository
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
@@ -129,7 +129,7 @@ In your repository settings:
 ### Sparse Checkout
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
@@ -141,7 +141,7 @@ In your repository settings:
 ### Full History
 
 ```yaml
-- uses: shousper/checkout-with-github-app-token@v1
+- uses: shousper/checkout-with-github-app@v1
   with:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.PRIVATE_KEY }}
